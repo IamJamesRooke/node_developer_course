@@ -1,6 +1,6 @@
 // Import the 'get' method from the 'https' module.
 // The 'https' module is built into Node.js and is used to make HTTPS requests.
-const { get } = require('https');
+const { get } = require('node:https');
 
 // Use the 'get' method to send an HTTPS GET request to 'https://www.google.com'.
 // The first argument is the URL to which the request is sent.

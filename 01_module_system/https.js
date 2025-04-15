@@ -1,5 +1,6 @@
-import { send } from './request.mjs';
-import { read }from './response.mjs';
+const { send, read } = require('./internals')
+// import { send } from './internals/request.mjs';
+// import { read }from './internals/response.mjs';
 
 function makeRequest(url, data) {
     send(url, data);
