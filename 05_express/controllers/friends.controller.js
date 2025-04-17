@@ -12,10 +12,6 @@ function postFriend(req, res) {
     res.json(newFriend);
 }
 
-function getFriends(req, res) {
-    res.json(model);
-}
-
 function getFriend(req, res) {
     const friendId = Number(req.params.friendId);
     const friend = model[friendId];
@@ -26,6 +22,10 @@ function getFriend(req, res) {
             error: 'Friend does not exist'
         });
     }
+}
+
+function getFriends(req, res) {
+    res.json(model);
 }
 
 module.exports = {
