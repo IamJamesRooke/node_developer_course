@@ -3,6 +3,9 @@ const express = require('express');
 const app = express();
 const PORT = 3000;
 
+// Utilities
+const path = require('path');
+
 // Router Imports
 const friendsRouter = require('./routes/friends.router')
 const messagesRouter = require('./routes/messages.router')
@@ -14,6 +17,8 @@ app.use((req, res, next) => {
     const delta = Date.now() - start;
     console.log(`${req.method} ${req.baseUrl}${req.url} ${delta}ms`);
 })
+
+app.use('/site', express.static(path.join(__dirname, 'public')))
 
 // JSON Middleware
 app.use(express.json());
