@@ -4,6 +4,8 @@ const cors = require('cors');
 const morgan = require('morgan');
 
 const planetsRouter = require('./routes/planets/planets.router')
+const launchesRouter = require('./routes/launches/launches.router.js')
+
 
 const app = express();
 
@@ -19,6 +21,8 @@ app.use(express.json()); // Parses incoming JSON requests
 app.use(express.static(path.join(__dirname, '..', 'public')))
 
 app.use('/planets', planetsRouter); // Mounts the planets router at the '/planets' path
+app.use('/launches', launchesRouter); // Mounts the launches router at the '/launches' path
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'index.html'))
 });
