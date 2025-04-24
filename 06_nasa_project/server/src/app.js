@@ -3,28 +3,29 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 
-const planetsRouter = require('./routes/planets/planets.router')
-const launchesRouter = require('./routes/launches/launches.router.js')
-
+const planetsRouter = require('./routes/planets/planets.router');
+const launchesRouter = require('./routes/launches/launches.router.js');
 
 const app = express();
 
 // Middleware
-
 app.use(cors({
     origin: 'http://localhost:3000'
 }));
 
-app.use(morgan('combined'))
+app.use(morgan('combined'));
 
 app.use(express.json()); // Parses incoming JSON requests
-app.use(express.static(path.join(__dirname, '..', 'public')))
+app.use(express.static(path.join(__dirname, '..', 'public'))); // Serves static files
 
+// API Routes
 app.use('/planets', planetsRouter); // Mounts the planets router at the '/planets' path
 app.use('/launches', launchesRouter); // Mounts the launches router at the '/launches' path
 
+// Catch-All Route for React Frontend
+// TODO: Get CATCH ALL WORKING
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'))
+    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 module.exports = app;
