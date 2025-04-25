@@ -1,3 +1,5 @@
+const { describe, test } = require('node:test');
+const assert = require('node:assert');
 const request = require('supertest');
 const app = require('../../app');
 
@@ -6,31 +8,32 @@ describe('Test GET /launches', () => {
         const response = await request(app)
             .get('/launches')
             .expect('Content-Type', /json/)
-            .expect(200)
+            .expect(200);
+
+        assert.strictEqual(response.status, 200, 'Expected status code 200');
     });
 });
 
 describe('Test POST /launches', () => {
-
     const completeLaunchData = {
         mission: 'USS Enterprise',
         rocket: 'NCC 1701-D',
         target: 'Kepler 186 f',
-        launchDate: 'January 4, 2028'
-    }
+        launchDate: 'January 4, 2028',
+    };
 
     const launchDataWithoutDate = {
         mission: 'USS Enterprise',
         rocket: 'NCC 1701-D',
         target: 'Kepler 186 f',
-    }
+    };
 
     const launchDataWithInvalidDate = {
         mission: 'USS Enterprise',
         rocket: 'NCC 1701-D',
         target: 'Kepler 186 f',
-        launchDate: 'cat'
-    }
+        launchDate: 'cat',
+    };
 
     test('Should respond with 201 created.', async () => {
         const response = await request(app)
@@ -41,9 +44,21 @@ describe('Test POST /launches', () => {
 
         const requestDate = new Date(completeLaunchData.launchDate).valueOf();
         const responseDate = new Date(response.body.launchDate).valueOf();
-        expect(responseDate).toBe(requestDate);
+        assert.strictEqual(responseDate, requestDate, 'Launch date does not match');
 
-        expect(response.body).toMatchObject(launchDataWithoutDate);
+        assert.deepStrictEqual(
+            {
+                mission: response.body.mission,
+                rocket: response.body.rocket,
+                target: response.body.target,
+            },
+            {
+                mission: completeLaunchData.mission,
+                rocket: completeLaunchData.rocket,
+                target: completeLaunchData.target,
+            },
+            'Launch data does not match'
+        );
     });
 
     test('Should catch missing required properties.', async () => {
@@ -53,9 +68,9 @@ describe('Test POST /launches', () => {
             .expect('Content-Type', /json/)
             .expect(400);
 
-        expect(response.body).toStrictEqual({
-            error: 'Missing required launch property.'
-        });
+        assert.deepStrictEqual(response.body, {
+            error: 'Missing required launch property.',
+        }, 'Error message does not match for missing properties');
     });
 
     test('Should catch invalid dates.', async () => {
@@ -65,8 +80,8 @@ describe('Test POST /launches', () => {
             .expect('Content-Type', /json/)
             .expect(400);
 
-        expect(response.body).toStrictEqual({
-            error: 'Invalid launch date.', // Match the actual error message
-        });
+        assert.deepStrictEqual(response.body, {
+            error: 'Invalid launch date.',
+        }, 'Error message does not match for invalid date');
     });
-})
+});
