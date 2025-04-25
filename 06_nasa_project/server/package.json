@@ -14,7 +14,8 @@
   "description": "NASA Mission Control API",
   "devDependencies": {
     "jest": "^29.7.0",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "supertest": "^7.1.0"
   },
   "dependencies": {
     "cors": "^2.8.5",
