@@ -22,7 +22,7 @@ async function startServer() {
     await mongoose.connect(MONGO_URL);
     await loadPlanetsData();
     
-    server.listen(PORT, () => {console.log('Listening on PORT', PORT)});
+    server.listen(PORT, () => {console.log(`https://localhost:${PORT}`)})
 }
 
 startServer();
