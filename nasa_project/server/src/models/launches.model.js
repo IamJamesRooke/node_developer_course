@@ -18,12 +18,14 @@ const launch = {
 saveLaunch(launch);
 
 const SPACEX_API_URL = "https://api.spacexdata.com/v4/launches/query/"
+async function populateLaunches() {
 
-async function loadLaunchesData() {
     console.log('Downloading launch data...');
+
     const response = await axios.post(SPACEX_API_URL, {
         query: {},
         options: {
+            pagination: false,
             populate: [
                 {
                     path: 'rocket',
@@ -44,13 +46,13 @@ async function loadLaunchesData() {
 
     const launchDocs = response.data.docs;
     for (const launchDoc of launchDocs) {
-        
+
         const payloads = launchDoc['payloads']
         const customers = payloads.flatMap((payload) => {
             return payload['customers']
         })
-        
-        const launch  = {
+
+        const launch = {
             flightNumber: launchDoc['flight_number'],
             mission: launchDoc['name'],
             rocket: launchDoc['rocket']['name'],
@@ -61,18 +63,39 @@ async function loadLaunchesData() {
         }
 
         console.log(`${launch.flightNumber} ${launch.mission}`)
+
+        // TODO: populate launches collection
     }
 }
 
+async function loadLaunchesData() {
+
+    // Checking with one example if the data has already been previously downloaded
+    const firstLaunch = await findLaunch({
+        flightNumber: 1,
+        rocket: 'Falcon 1',
+        mission: 'FalconSat',
+
+    })
+
+    if (firstLaunch) {
+        console.log('Launch data already loaded.');
+    } else {
+        await populateLaunches();
+    }
+}
+
+async function findLaunch(filter) {
+    return await launchesDatabase.findOne(filter);
+}
+
 async function existsLaunchWithId(launchId) {
-    return await launchesDatabase.findOne({
-        flightNumber: launchId,
-    });
+    return await findLaunch({ flightNumber: launchId, });
 }
 
 async function getAllLaunches() {
     return await launchesDatabase
-        .find({}, {'__id': 0, '__v': 0});
+        .find({}, { '__id': 0, '__v': 0 });
 }
 
 async function getLatestFlightNumber() {
@@ -88,14 +111,14 @@ async function getLatestFlightNumber() {
 }
 
 async function saveLaunch(launch) {
-    
+
     const planet = await planets.findOne({
         keplerName: launch.target,
     });
 
     if (!planet) {
         throw new Error('No matching planet found.')
-    } 
+    }
 
     await launchesDatabase.findOneAndUpdate({
         flightNumber: launch.flightNumber,
