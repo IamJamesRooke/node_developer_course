@@ -8,12 +8,15 @@ COPY client/package*.json client/
 RUN cd client && npm install
 
 COPY server/package*.json server/
-RUN cd server && npm install --omit=dev
+RUN cd server && npm install
 
 COPY client/ client/
 RUN npm run build --prefix client
 
 COPY server/ server/
+
+# Change ownership of node_modules to node user
+RUN chown -R node:node /app/server/node_modules
 
 USER node
 
