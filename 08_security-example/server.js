@@ -5,16 +5,24 @@ const express = require('express');
 const helmet = require('helmet');
 const passport = require('passport');
 const { Strategy } = require('passport-google-oauth20');
-const { config } = require('dotenv');
+const cookieSession = require('cookie-session');
+const { verify } = require('crypto');
 
-require('dotenv').config()
+require('dotenv').config();
 
 const PORT = 3000;
 
+const config = {
+    CLIENT_ID: process.env.CLIENT_ID,
+    CLIENT_SECRET: process.env.CLIENT_SECRET,
+    COOKIE_KEY_1: process.env.COOKIE_KEY_1,
+    COOKIE_KEY_2: process.env.COOKIE_KEY_2,
+};
+
 const AUTH_OPTIONS = {
     callbackURL: '/auth/google/callback',
-    clientID: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
+    clientID: config.CLIENT_ID,
+    clientSecret: config.CLIENT_SECRET,
 }
 
 function verifyCallback(accessToken, refreshToken, profile, done) {
@@ -24,11 +32,43 @@ function verifyCallback(accessToken, refreshToken, profile, done) {
 
 passport.use(new Strategy(AUTH_OPTIONS, verifyCallback))
 
+// Save session to cookie.
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+// Read session from cookie.
+passport.deserializeUser((id, done) => {
+    done(null, id);
+});
+
 const app = express();
 
 app.use(helmet());
-app.use(passport.initialize());
 
+app.use(cookieSession({
+    name: 'session',
+    maxAge: 24 * 60 * 60 * 1000,
+    keys: [ config.COOKIE_KEY_1, config.COOKIE_KEY_2]
+}));
+
+// Don't remove this code.
+app.use((req, res, next) => {
+    if (req.session && !req.session.regenerate) {
+        req.session.regenerate = (cb) => {
+            cb();
+        }
+    }
+    if (req.session && !req.session.save) {
+        req.session.save = (cb) => {
+            cb();
+        }
+    }
+    next();
+});
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 function checkLoggedIn(req, res, next) {
     const isLoggedIn = true; //TODO
@@ -50,7 +90,7 @@ app.get('/auth/google/callback',
     passport.authenticate('google', {
     failureRedirect: '/failure',
     success: '/',
-    session: false,
+    session: true,
     }), 
     (req, res) => {
         console.log('Google Called Back')
