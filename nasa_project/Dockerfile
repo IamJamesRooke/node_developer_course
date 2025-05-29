@@ -5,15 +5,15 @@ WORKDIR /app
 COPY package*.json ./
 
 COPY client/package*.json client/
-RUN npm install-client --omit=dev
+RUN cd client && npm install
 
 COPY server/package*.json server/
-RUN npm install-server --omit=dev
+RUN cd server && npm install --omit=dev
 
 COPY client/ client/
 RUN npm run build --prefix client
 
-COPY /server /server
+COPY server/ server/
 
 USER node
 
